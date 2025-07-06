@@ -1,4 +1,4 @@
-// Arquivo: backend/src/routes/climaRoutes.js
+
 
 const express = require('express');
 const { body, validationResult, param } = require('express-validator');
@@ -37,6 +37,16 @@ router.post('/',
 
             const dadoInserido = await Clima.inserir(novoDado);
             console.log(`[${new Date().toISOString()}] Inserção de clima por usuário ${req.user.username}:`, novoDado);
+            
+            // --- ALTERAÇÃO SUGERIDA ---
+            // Invalida o cache da rota que busca todos os climas
+            const cacheKey = 'clima_todos';
+            if (cache.has(cacheKey)) {
+                cache.del(cacheKey);
+                console.log(`[${new Date().toISOString()}] Cache '${cacheKey}' invalidado devido à nova inserção.`);
+            }
+            // --- FIM DA ALTERAÇÃO ---
+
             // O status 201 significa "Created" (Criado), ideal para respostas de POST.
             res.status(201).json(dadoInserido);
         } catch (error) {
